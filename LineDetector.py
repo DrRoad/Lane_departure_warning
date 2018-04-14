@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import cv2 as cv
 import numpy as np
 from Sensor import LaneSensor
@@ -57,17 +58,17 @@ class LineDetector():
 
     def CheckLinePositionAndDrawOutput(self, outputFull, img):
         testLineXOkColor = np.array([0,255,0])/1.0
-        # testLineXOkColor = np.array([255,255,255])/10.0
+        # testLineXOkColor = np.array([255,255,255])/30.5
         testLineXAlertColor = np.array([0,128,255])/1.0
         testLineXDangerColor = np.array([0,0,255])/1.0
         
-        testLeftLineXAlert = 530
-        testLeftLineXDanger = 730
-        # testLeftLineXAlert = 130
-        # testLeftLineXDanger = 230
+        # testLeftLineXAlert = 530
+        # testLeftLineXDanger = 730
+        testLeftLineXAlert = 130
+        testLeftLineXDanger = 230
 
         testRightLineXAlert = 550
-        testRightLineXDanger = 450
+        testRightLineXDanger = 290
 
         testLeftLineY = 390
         
@@ -93,18 +94,37 @@ class LineDetector():
                 lanePositionColor = testLineXDangerColor
     
         #line model
+        # cинии линии
         cv.line(outputFull, (self.cropArea[0]+int(self.lineModel(0)), self.cropArea[1]+0), (self.cropArea[0]+int(self.lineModel(img.shape[0])), self.cropArea[1]+img.shape[0]), [255, 0, 0], 2)        
-        cv.line(outputFull, (self.cropArea[0]+0,self.cropArea[1]+testLeftLineY) , (self.cropArea[0]+img.shape[1],self.cropArea[1]+testLeftLineY), [0.2,0.2,0.2])
+
+        # Тонкая чёрная линия
+        # cv.line(outputFull, (self.cropArea[0]+100,self.cropArea[1]+testLeftLineY) , (self.cropArea[0]+img.shape[1],self.cropArea[1]+testLeftLineY), [0.2,0.2,0.2])
+       
         #zones L
-        cv.line(outputFull, (self.cropArea[0]+0,self.cropArea[1]+testLeftLineY) , (self.cropArea[0]+testLeftLineXAlert,self.cropArea[1]+testLeftLineY), testLineXOkColor, 2)
+        # левая зеленая линия
+        cv.line(outputFull, (self.cropArea[0]+100,self.cropArea[1]+testLeftLineY) , (self.cropArea[0]+testLeftLineXAlert,self.cropArea[1]+testLeftLineY), testLineXOkColor, 2)
+
+        # левая оранжевая линия
         cv.line(outputFull, (self.cropArea[0]+testLeftLineXAlert,self.cropArea[1]+testLeftLineY) , (self.cropArea[0]+testLeftLineXDanger,self.cropArea[1]+testLeftLineY), testLineXAlertColor, 2)
+        
+        # левая красная линия
         cv.line(outputFull, (self.cropArea[0]+testLeftLineXDanger,self.cropArea[1]+testLeftLineY) , (self.cropArea[0]+img.shape[1]/2,self.cropArea[1]+testLeftLineY), testLineXDangerColor, 2)
+      
+    
         #zones R
+        # правая зеленая линия
         cv.line(outputFull, (self.cropArea[0]+img.shape[1],self.cropArea[1]+testLeftLineY) , (self.cropArea[0]+testRightLineXAlert,self.cropArea[1]+testLeftLineY), testLineXOkColor, 2)
+        
+        # правая оранжевая линия
         cv.line(outputFull, (self.cropArea[0]+testRightLineXAlert,self.cropArea[1]+testLeftLineY), (self.cropArea[0]+testRightLineXDanger,self.cropArea[1]+testLeftLineY), testLineXAlertColor, 2)
-        cv.line(outputFull, (self.cropArea[0]+testRightLineXDanger,self.cropArea[1]+testLeftLineY), (self.cropArea[0]+img.shape[1]/2,self.cropArea[1]+testLeftLineY), testLineXDangerColor, 2)
-        #intersection circle
+
+        # правая красная линия
+        # cv.line(outputFull, (self.cropArea[0]+testRightLineXDanger,self.cropArea[1]+testLeftLineY), (self.cropArea[0]+img.shape[1]/2,self.cropArea[1]+testLeftLineY), testLineXDangerColor, 2)
+        
+  
+        # круги на пересечинии синих линий и горизонтальной разноцветной линии
         cv.circle(outputFull, (self.cropArea[0]+testLeftLineIntersection, self.cropArea[1]+testLeftLineY), 2, lanePositionColor, 3)
+
         #alerts
         if lanePosition == 'AlertLeft' or lanePosition == 'DangerLeft':
             cv.line(outputFull, (img.shape[1]/2,50), (img.shape[1]/2-25,75), lanePositionColor, 15)
