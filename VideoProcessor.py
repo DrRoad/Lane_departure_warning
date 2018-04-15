@@ -31,9 +31,13 @@ ROI_VERTICES = np.array([[(50, 540), (420, 330), (590, 330),
 #                 'high_th': gimp_to_opencv_hsv(65, 100, 100),
 #                 'kernel': np.ones((3,3),np.uint64)}
 
+WHITE_LINES = { 'low_th':  gimp_to_opencv_hsv(281, 27, 100),
+                'high_th': gimp_to_opencv_hsv(291, 98, 100),
+                'kernel': np.ones((3,3), np.uint64) }
 
-WHITE_LINES = { 'low_th': gimp_to_opencv_hsv(0, 0, 80),
-                'high_th': gimp_to_opencv_hsv(359, 10, 100) }
+# WHITE_LINES = { 'low_th':  gimp_to_opencv_hsv(281, 27, 100),
+#                 'high_th': gimp_to_opencv_hsv(291, 98, 100) }
+                # 'high_th': gimp_to_opencv_hsv(359, 10, 100) }
                 # 'high_th': gimp_to_opencv_hsv(284, 97, 100) }
 
 # YELLOW_LINES = { 'low_th': gimp_to_opencv_hsv(35, 20, 30),
@@ -152,7 +156,7 @@ while(cv.waitKey(1) != 27): # пока не нажат esc
     #do some preprocessing to share results later
     img = np.float32(imgFull[cropArea[1]:cropArea[3], cropArea[0]:cropArea[2]])/255.0
    
-    # # меняем цветовую модель на HSV
+    # # # меняем цветовую модель на HSV
     # hsv = np.float32(cv.cvtColor(img, cv.COLOR_RGB2HSV))
     # # hsv = cv.GaussianBlur(hsv, (25, 25), 2)
     #
@@ -164,17 +168,17 @@ while(cv.waitKey(1) != 27): # пока не нажат esc
 
 
     hsv = np.float32(cv.cvtColor(img, cv.COLOR_RGB2HSV))
-    
+
     # binary_mask = get_lane_lines_mask(hsv, [WHITE_LINES, YELLOW_LINES])
     binary_mask = get_lane_lines_mask(hsv, [WHITE_LINES, WHITE_LINES ])
-  
+
     masked_image = draw_binary_mask(binary_mask, hsv)
-    
+
     blank_image = np.zeros_like(img)
-    
+
     canny = cv.Canny(np.uint8(masked_image), 280, 360)
     # canny = cv.Canny(np.uint8(masked_image), 0, 170)
-    
+
     # canny = draw_canny_edges(edges_mask, blank_image)
 
 
@@ -201,6 +205,7 @@ while(cv.waitKey(1) != 27): # пока не нажат esc
     cv.imshow("Output full", outputFull)
     cv.imshow("Output hsv", outputHSV)
     cv.imshow("Output canny", outputCANNY)
+
     cv.imshow("Output mask", outputMask)
     cv.imshow("Output binary", outputBinary)
     
