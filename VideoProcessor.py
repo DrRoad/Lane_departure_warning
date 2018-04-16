@@ -24,16 +24,16 @@ ROI_VERTICES = np.array([[(50, 540), (420, 330), (590, 330),
 
 # White and yellow color thresholds for lines masking.
 # Optional "kernel" key is used for additional morphology
-# WHITE_LINES = { 'low_th': gimp_to_opencv_hsv(0, 0, 80),
-#                 'high_th': gimp_to_opencv_hsv(359, 10, 100) }
+WHITE_LINES = { 'low_th': gimp_to_opencv_hsv(0, 0, 80),
+                'high_th': gimp_to_opencv_hsv(359, 10, 100) }
 #
 # YELLOW_LINES = { 'low_th': gimp_to_opencv_hsv(35, 20, 30),
 #                 'high_th': gimp_to_opencv_hsv(65, 100, 100),
 #                 'kernel': np.ones((3,3),np.uint64)}
 
-WHITE_LINES = { 'low_th':  gimp_to_opencv_hsv(281, 27, 100),
-                'high_th': gimp_to_opencv_hsv(291, 98, 100),
-                'kernel': np.ones((3,3), np.uint64) }
+# WHITE_LINES = { 'low_th':  gimp_to_opencv_hsv(281, 27, 100),
+#                 'high_th': gimp_to_opencv_hsv(291, 98, 100),
+#                 'kernel': np.ones((3,3), np.uint64) }
 
 # WHITE_LINES = { 'low_th':  gimp_to_opencv_hsv(281, 27, 100),
 #                 'high_th': gimp_to_opencv_hsv(291, 98, 100) }
@@ -78,14 +78,42 @@ parser.add_option("-i", "--input", dest="input_video", help="", default="video/i
 parser.add_option("-o", "--output", dest="output_video", help="", default="video/out/out_video.mp4")  
 (options, args) = parser.parse_args() 
 
+
 # Входной поток видео
 stream = cv.VideoCapture(options.input_video) #6 7 8
-if stream.isOpened() == False:
+if stream.isOpened():
+    # width = stream.get(cv.CV_CAP_PROP_FRAME_WIDTH)   # float
+    # height = stream.get(cv.CV_CAP_PROP_FRAME_HEIGHT) # float
+    #
+    # # or
+    width = stream.get(3)  # float
+    height = stream.get(4) # float
+    #
+    # # it gives me 0.0 :/
+    # fps = vcap.get(cv2.cv.CV_CAP_PROP_FPS)
+	# print width
+	# print 'The value of PI is approximately {}.'.format(math.pi)
+    print 'Ширина {}'.format(height)
+    print width
+else:
     print "Cannot open input video"
     exit()
 
+
 # Выходной поток видео
 videoWriter = cv.VideoWriter(options.output_video, cv.VideoWriter_fourcc(*'MJPG'), 30, (1280, 720), 1)
+
+
+''' 
+Вычислим рабочую область в которой будет происходить основое действие
+В этой области будем искать сенсорами разметку
+'''
+x1 = int(width/4)
+y1 = int(height/2)
+
+x2 = int(x1*3)
+y2 = int(height)
+
 
 # размер области захвата видео для определения полос
 # cropArea = [x1, y1, x2, y2]
@@ -104,7 +132,8 @@ videoWriter = cv.VideoWriter(options.output_video, cv.VideoWriter_fourcc(*'MJPG'
 #      |
 #
 # cropArea = [0, 124, 637, 298] # для видео 640*480
-cropArea = [0, 250, 1240, 645]  # для видео 1280*720
+# cropArea = [0, 250, 1240, 645]  # для видео 1280*720
+cropArea = [x1, y1, x2, y2]  # для видео 1280*720
 sensorsNumber = 50
 sensorsWidth = 70
 
@@ -157,30 +186,30 @@ while(cv.waitKey(1) != 27): # пока не нажат esc
     img = np.float32(imgFull[cropArea[1]:cropArea[3], cropArea[0]:cropArea[2]])/255.0
    
     # # # меняем цветовую модель на HSV
-    # hsv = np.float32(cv.cvtColor(img, cv.COLOR_RGB2HSV))
-    # # hsv = cv.GaussianBlur(hsv, (25, 25), 2)
-    #
-    # canny = cv.Canny(cv.cvtColor(np.uint8(img*255), cv.COLOR_RGB2GRAY), 0, 170)
-    # # canny = cv.Canny(cv.cvtColor(np.uint8(img*255), cv.COLOR_RGB2GRAY), 70, 170)
-
-
-
-
-
     hsv = np.float32(cv.cvtColor(img, cv.COLOR_RGB2HSV))
+    hsv = cv.GaussianBlur(hsv, (25, 25), 2)
 
-    # binary_mask = get_lane_lines_mask(hsv, [WHITE_LINES, YELLOW_LINES])
-    binary_mask = get_lane_lines_mask(hsv, [WHITE_LINES, WHITE_LINES ])
+    canny = cv.Canny(cv.cvtColor(np.uint8(img*255), cv.COLOR_RGB2GRAY), 0, 170, 20)
+    # canny = cv.Canny(cv.cvtColor(np.uint8(img*255), cv.COLOR_RGB2GRAY), 70, 170)
 
-    masked_image = draw_binary_mask(binary_mask, hsv)
 
-    blank_image = np.zeros_like(img)
 
-    canny = cv.Canny(np.uint8(masked_image), 280, 360)
-    # canny = cv.Canny(np.uint8(masked_image), 0, 170)
 
-    # canny = draw_canny_edges(edges_mask, blank_image)
 
+    # hsv = np.float32(cv.cvtColor(img, cv.COLOR_RGB2HSV))
+    #
+    # # binary_mask = get_lane_lines_mask(hsv, [WHITE_LINES, YELLOW_LINES])
+    # binary_mask = get_lane_lines_mask(hsv, [WHITE_LINES, WHITE_LINES ])
+    #
+    # masked_image = draw_binary_mask(binary_mask, hsv)
+    #
+    # blank_image = np.zeros_like(img)
+    #
+    # canny = cv.Canny(np.uint8(masked_image), 0, 170, 10)
+    # # canny = cv.Canny(np.uint8(masked_image), 0, 170)
+    #
+    # # canny = draw_canny_edges(edges_mask, blank_image)
+    #
 
 
 
@@ -192,22 +221,22 @@ while(cv.waitKey(1) != 27): # пока не нажат esc
     outputHSV = hsv.copy()
     outputCANNY = canny.copy()
     
-    outputMask = masked_image.copy()
-    outputBinary = binary_mask.copy()
+    # outputMask = masked_image.copy()
+    # outputBinary = binary_mask.copy()
 
     #process frame
-    leftLine.ProcessFrame(img, hsv, canny, outputImg, outputFull)
-    rightLine.ProcessFrame(img, hsv, canny, outputImg, outputFull)
+    leftLine.ProcessFrame(img, hsv, canny, outputImg, outputFull, y1)
+    rightLine.ProcessFrame(img, hsv, canny, outputImg, outputFull, y1)
     
     
     #show output
     cv.imshow("Output", outputImg)
     cv.imshow("Output full", outputFull)
-    cv.imshow("Output hsv", outputHSV)
+    # cv.imshow("Output hsv", outputHSV)
     cv.imshow("Output canny", outputCANNY)
 
-    cv.imshow("Output mask", outputMask)
-    cv.imshow("Output binary", outputBinary)
+    # cv.imshow("Output mask", outputMask)
+    # cv.imshow("Output binary", outputBinary)
     
     #write output
     videoWriter.write(outputFull)

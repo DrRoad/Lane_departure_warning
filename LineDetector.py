@@ -20,7 +20,7 @@ class LineDetector():
             self.lineSensors.append(sensor) 
         self.lineModel = np.poly1d(np.polyfit([lineStart[1], lineEnd[1]], [lineStart[0], lineEnd[0]], 1)) 
     
-    def ProcessFrame(self, img, hsv, canny, outputImg, outputFull):
+    def ProcessFrame(self, img, hsv, canny, outputImg, outputFull, y1):
         #sensors
         laneCoordinatesX = []
         laneCoordinatesY = []
@@ -54,9 +54,9 @@ class LineDetector():
                 #cv.circle(outputImg, (laneCoordinatesX[i], laneCoordinatesY[i]), 2, [200, 0, 100], 2)
                 cv.circle(outputImg, (int(self.lineModel(sensor.yPos)), sensor.yPos), 2, [100, 0, 200], 1)
         
-        self.CheckLinePositionAndDrawOutput(outputFull, img)
+        self.CheckLinePositionAndDrawOutput(outputFull, img, y1)
 
-    def CheckLinePositionAndDrawOutput(self, outputFull, img):
+    def CheckLinePositionAndDrawOutput(self, outputFull, img, y1):
         testLineXOkColor = np.array([0,255,0])/1.0
         # testLineXOkColor = np.array([255,255,255])/30.5
         testLineXAlertColor = np.array([0,128,255])/1.0
@@ -70,7 +70,7 @@ class LineDetector():
         testRightLineXAlert = 550
         testRightLineXDanger = 290
 
-        testLeftLineY = 390
+        testLeftLineY = y1 - 20
         
         #find intersection of a lane edge and test line
         testLeftLineIntersection = int(self.lineModel(testLeftLineY))
