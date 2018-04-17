@@ -70,7 +70,8 @@ class LineDetector():
         testRightLineXAlert = 550
         testRightLineXDanger = 290
 
-        testLeftLineY = y1 - 20
+        # testLeftLineY = y1 - 20
+        testLeftLineY = 390
         
         #find intersection of a lane edge and test line
         testLeftLineIntersection = int(self.lineModel(testLeftLineY))

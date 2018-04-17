@@ -108,12 +108,23 @@ videoWriter = cv.VideoWriter(options.output_video, cv.VideoWriter_fourcc(*'MJPG'
 Вычислим рабочую область в которой будет происходить основое действие
 В этой области будем искать сенсорами разметку
 '''
-x1 = int(width/4)
-y1 = int(height/2)
 
-x2 = int(x1*3)
+# x1 = int(width/4) 
+# y1 = int(height/2)
+# x2 = int(x1*3)
+# y2 = int(height)
+
+x1 = int(width/9) 
+y1 = int(height/2)
+x2 = width
 y2 = int(height)
 
+# x1 = 140
+# y1 = int(height/2)
+# x2 = width
+# y2 = int(height)
+
+print x1, y1, x2, y2
 
 # размер области захвата видео для определения полос
 # cropArea = [x1, y1, x2, y2]
@@ -140,19 +151,29 @@ sensorsWidth = 70
 # #6L
 # line1LStart = np.array([35, 128])
 # line1LEnd = np.array([220, 32])
-#
+# #
 # #6R
 # line1RStart = np.array([632, 146])
 # line1REnd = np.array([476, 11])
+
+# # расположение синих линий на видео в координатах
+# #L
+# line1LStart = np.array([x1 + 35, y1 + 300])
+# line1LEnd = np.array([x1 + 220, y1 + 100])
+# #
+# #R
+# line1RStart = np.array([x1 + 632, y1 + 300])
+# line1REnd = np.array([x1 + 476, y1 + 100])
 
 # расположение синих линий на видео в координатах
 #L
 line1LStart = np.array([35, 300])
 line1LEnd = np.array([220, 100])
-
+#
 #R
-line1RStart = np.array([632, 300])
-line1REnd = np.array([476, 100])
+line1RStart = np.array([932, 300])
+line1REnd = np.array([776, 100])
+
 
 #get first frame for color model
 # flag, imgFull = stream.read()
