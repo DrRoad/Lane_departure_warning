@@ -116,15 +116,25 @@ videoWriter = cv.VideoWriter(options.output_video, cv.VideoWriter_fourcc(*'MJPG'
 
 x1 = int(width/9) 
 y1 = int(height/2)
-x2 = width
+x2 = int(width)
 y2 = int(height)
+
+# x1 = int(width/6) 
+# y1 = int(height/3) * 2
+# x2 = int(width - width/9)
+# y2 = int(height)
+
 
 # x1 = 140
 # y1 = int(height/2)
 # x2 = width
 # y2 = int(height)
 
-print x1, y1, x2, y2
+# print x1, y1, x2, y2
+#
+''' Ширина области для построения радужной линии '''
+width_crop  = x2 - x1
+# height_crop = y2 - y1
 
 # размер области захвата видео для определения полос
 # cropArea = [x1, y1, x2, y2]
@@ -168,11 +178,21 @@ sensorsWidth = 70
 # расположение синих линий на видео в координатах
 #L
 line1LStart = np.array([35, 300])
-line1LEnd = np.array([220, 100])
+line1LEnd = np.array([220, 100]) #100
 #
 #R
 line1RStart = np.array([932, 300])
 line1REnd = np.array([776, 100])
+
+# расположение синих линий на видео в координатах
+#L
+# line1LStart = np.array([35, height_crop - int(height_crop/9)])
+# line1LEnd = np.array([int(width/2) - 55, int(height_crop/9)])
+# # line1LEnd = np.array([int(width_crop/2) - 55, int(height_crop/9)])
+# #
+# #R
+# line1RStart = np.array([int(width_crop/2) + 35, int(height_crop/9)])
+# line1REnd = np.array([width_crop - 35, height_crop - int(height_crop/9)])
 
 
 #get first frame for color model
@@ -210,7 +230,7 @@ while(cv.waitKey(1) != 27): # пока не нажат esc
     hsv = np.float32(cv.cvtColor(img, cv.COLOR_RGB2HSV))
     hsv = cv.GaussianBlur(hsv, (25, 25), 2)
 
-    canny = cv.Canny(cv.cvtColor(np.uint8(img*255), cv.COLOR_RGB2GRAY), 0, 170, 20)
+    canny = cv.Canny(cv.cvtColor(np.uint8(img*255), cv.COLOR_RGB2GRAY), 0, 170, 0)
     # canny = cv.Canny(cv.cvtColor(np.uint8(img*255), cv.COLOR_RGB2GRAY), 70, 170)
 
 
@@ -246,14 +266,14 @@ while(cv.waitKey(1) != 27): # пока не нажат esc
     # outputBinary = binary_mask.copy()
 
     #process frame
-    leftLine.ProcessFrame(img, hsv, canny, outputImg, outputFull, y1)
-    rightLine.ProcessFrame(img, hsv, canny, outputImg, outputFull, y1)
+    leftLine.ProcessFrame(img, hsv, canny, outputImg, outputFull, y1, width_crop)
+    rightLine.ProcessFrame(img, hsv, canny, outputImg, outputFull, y1, width_crop)
     
     
     #show output
     cv.imshow("Output", outputImg)
     cv.imshow("Output full", outputFull)
-    # cv.imshow("Output hsv", outputHSV)
+    cv.imshow("Output hsv", outputHSV)
     cv.imshow("Output canny", outputCANNY)
 
     # cv.imshow("Output mask", outputMask)

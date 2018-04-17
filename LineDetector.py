@@ -20,7 +20,7 @@ class LineDetector():
             self.lineSensors.append(sensor) 
         self.lineModel = np.poly1d(np.polyfit([lineStart[1], lineEnd[1]], [lineStart[0], lineEnd[0]], 1)) 
     
-    def ProcessFrame(self, img, hsv, canny, outputImg, outputFull, y1):
+    def ProcessFrame(self, img, hsv, canny, outputImg, outputFull, y1, width_crop):
         #sensors
         laneCoordinatesX = []
         laneCoordinatesY = []
@@ -54,9 +54,9 @@ class LineDetector():
                 #cv.circle(outputImg, (laneCoordinatesX[i], laneCoordinatesY[i]), 2, [200, 0, 100], 2)
                 cv.circle(outputImg, (int(self.lineModel(sensor.yPos)), sensor.yPos), 2, [100, 0, 200], 1)
         
-        self.CheckLinePositionAndDrawOutput(outputFull, img, y1)
+        self.CheckLinePositionAndDrawOutput(outputFull, img, y1, width_crop)
 
-    def CheckLinePositionAndDrawOutput(self, outputFull, img, y1):
+    def CheckLinePositionAndDrawOutput(self, outputFull, img, y1, width_crop):
         testLineXOkColor = np.array([0,255,0])/1.0
         # testLineXOkColor = np.array([255,255,255])/30.5
         testLineXAlertColor = np.array([0,128,255])/1.0
@@ -64,14 +64,18 @@ class LineDetector():
         
         # testLeftLineXAlert = 530
         # testLeftLineXDanger = 730
-        testLeftLineXAlert = 130
-        testLeftLineXDanger = 230
 
-        testRightLineXAlert = 550
-        testRightLineXDanger = 290
+        offset_ot_end_OK     = int(width_crop / 4)  # 25%
+        offset_ot_end_Alert  = int(width_crop / 6)  # 15%
+        offset_ot_end_Danger = int(width_crop / 10) # 10%
 
-        # testLeftLineY = y1 - 20
-        testLeftLineY = 390
+        testLeftLineXAlert = offset_ot_end_OK
+        testLeftLineXDanger = offset_ot_end_OK + offset_ot_end_Alert
+        testRightLineXDanger = offset_ot_end_OK + offset_ot_end_Alert + offset_ot_end_Danger
+        testRightLineXAlert = offset_ot_end_OK + offset_ot_end_Alert + offset_ot_end_Danger + offset_ot_end_Alert
+
+        testLeftLineY = y1 - 20
+        # testLeftLineY = 100
         
         #find intersection of a lane edge and test line
         testLeftLineIntersection = int(self.lineModel(testLeftLineY))
@@ -99,11 +103,11 @@ class LineDetector():
         cv.line(outputFull, (self.cropArea[0]+int(self.lineModel(0)), self.cropArea[1]+0), (self.cropArea[0]+int(self.lineModel(img.shape[0])), self.cropArea[1]+img.shape[0]), [255, 0, 0], 2)        
 
         # Тонкая чёрная линия
-        # cv.line(outputFull, (self.cropArea[0]+100,self.cropArea[1]+testLeftLineY) , (self.cropArea[0]+img.shape[1],self.cropArea[1]+testLeftLineY), [0.2,0.2,0.2])
-       
+        cv.line(outputFull, (self.cropArea[0],self.cropArea[1]+testLeftLineY) , (self.cropArea[0]+img.shape[1],self.cropArea[1]+testLeftLineY), [0.2,0.2,0.2])
+
         #zones L
         # левая зеленая линия
-        cv.line(outputFull, (self.cropArea[0]+100,self.cropArea[1]+testLeftLineY) , (self.cropArea[0]+testLeftLineXAlert,self.cropArea[1]+testLeftLineY), testLineXOkColor, 2)
+        cv.line(outputFull, (self.cropArea[0],self.cropArea[1]+testLeftLineY) , (self.cropArea[0]+testLeftLineXAlert,self.cropArea[1]+testLeftLineY), testLineXOkColor, 2)
 
         # левая оранжевая линия
         cv.line(outputFull, (self.cropArea[0]+testLeftLineXAlert,self.cropArea[1]+testLeftLineY) , (self.cropArea[0]+testLeftLineXDanger,self.cropArea[1]+testLeftLineY), testLineXAlertColor, 2)
@@ -120,7 +124,7 @@ class LineDetector():
         cv.line(outputFull, (self.cropArea[0]+testRightLineXAlert,self.cropArea[1]+testLeftLineY), (self.cropArea[0]+testRightLineXDanger,self.cropArea[1]+testLeftLineY), testLineXAlertColor, 2)
 
         # правая красная линия
-        # cv.line(outputFull, (self.cropArea[0]+testRightLineXDanger,self.cropArea[1]+testLeftLineY), (self.cropArea[0]+img.shape[1]/2,self.cropArea[1]+testLeftLineY), testLineXDangerColor, 2)
+        cv.line(outputFull, (self.cropArea[0]+testRightLineXDanger,self.cropArea[1]+testLeftLineY), (self.cropArea[0]+img.shape[1]/2,self.cropArea[1]+testLeftLineY), testLineXDangerColor, 2)
         
   
         # круги на пересечинии синих линий и горизонтальной разноцветной линии
